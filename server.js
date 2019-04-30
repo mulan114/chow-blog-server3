@@ -1,4 +1,3 @@
-
 const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
@@ -12,22 +11,37 @@ mongoose.Promise = global.Promise;
 // config.js is where we control constants for entire
 // app like PORT and DATABASE_URL
 const { PORT, DATABASE_URL } = require('./config');
-const { Blog } = require('./models');
+const { BlogPost } = require('./models');
+const { Author } = require('./models');
 
 app.use(morgan('common'));
 app.use(express.json());
 
+
 // GET requests to /blogs => return 5 blogs
 app.get('/blogs', (req, res) => {
-  Blog.find()
+  // const db = mongoose.connection;
+  // db.collection("blogs").find().toArray((err, blogPosts) => {
+  //     console.log(blogPosts);
+  //     res.json({
+  //       blogPosts: blogPosts
+  //     })    
+  // })
+  BlogPost.find()
     .limit(30)
-    // success callback: for each restaurant we got back, we'll
+    // success callback: for each blogPost we get back, we'll
     // call the `.serialize` instance method we've created in
-    // models.js in order to only expose the data we want the API return.    
-    .then(blogs => {
+    // models.js in order to only expose the data we want the API return.
+    .populate('author')
+    .then(blogPosts => {
+
+      const temp = blogPosts.map(blogPost => blogPost.serialize());
+      console.log(blogPosts);
+      console.log(temp);
+      console.log('in find all');
       res.json({
-        blogs: blogs.map(blog => blog.serialize())
-      });
+        blogPosts: temp
+      })
     })
     .catch(err => {
       console.error(err);
@@ -37,7 +51,7 @@ app.get('/blogs', (req, res) => {
 
 // can also request by ID
 app.get("/blogs/:id", (req, res) => {
-  Blog
+  BlogPost
     // this is a convenience method Mongoose provides for searching
     // by the object _id property
     .findById(req.params.id)
@@ -59,7 +73,7 @@ app.post("/blogs", (req, res) => {
     }
   }
 
-  Blog.create({
+  BlogPost.create({
     title: req.body.title,
     content: req.body.content,
     author: req.body.author,
@@ -101,7 +115,7 @@ app.put("/blogs/:id", (req, res) => {
 });
 
 app.delete("/blogs/:id", (req, res) => {
-  Blog.findByIdAndRemove(req.params.id)
+  BlogPost.findByIdAndRemove(req.params.id)
     .then(blog => res.status(204).end())
     .catch(err => res.status(500).json({ message: "Internal server error" }));
 });
@@ -157,7 +171,7 @@ function closeServer() {
 // runs. but we also export the runServer command so other code (for instance,
 // test code) can start the server as needed.
 if (require.main === module) {
-  runServer(DATABASE_URL).catch(err => console.error(err));
+  runServer("mongodb://localhost:27017/blog-app").catch(err => console.error(err));
 }
 
 module.exports = { app, runServer, closeServer };

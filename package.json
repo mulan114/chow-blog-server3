@@ -1,0 +1,22 @@
+{
+  "name": "chow-blog-server",
+  "version": "1.0.0",
+  "description": "Thinkful Blog Server Assignment",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --exit"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4",
+    "mongoose": "^5.0.13",
+    "morgan": "^1.9.1",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.1",
+    "mocha": "^6.1.3"
+  }
+}
